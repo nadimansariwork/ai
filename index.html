@@ -178,13 +178,20 @@
     </div>
 
     <script>
-        const SUPABASE_URL = 'https://fkwelspxbicybrlhugrq.supabase.co';
-        const SUPABASE_KEY = 'sb_publishable_FYkUWEtjcxR9VkU3r9ewFQ_-2I1X32C';
+        const SUPABASE_URL = 'https://ztfybskmgyfwjkaxqubn.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_A0tMvKE61iGVB7efMuzmmQ_bDU88mMe';
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         async function loadStandeeData() {
             const params = new URLSearchParams(window.location.search);
-            const slug = params.get('id') || 'demo';
+            const slug = params.get('id');
+
+            if (!slug) {
+                document.getElementById('business-name').textContent = 'Smart Standee Hub';
+                document.getElementById('business-tagline').textContent = 'Tap an activated NFC standee or scan QR to open profile.';
+                document.getElementById('links-container').classList.add('hidden');
+                return;
+            }
 
             const { data, error } = await supabaseClient
                 .from('social_standees')
@@ -199,7 +206,6 @@
                 return;
             }
 
-            // Increment tap/scan count
             supabaseClient
                 .from('social_standees')
                 .update({ clicks_count: (data.clicks_count || 0) + 1 })

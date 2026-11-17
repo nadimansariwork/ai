@@ -22,7 +22,6 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
         body { background: var(--bg); color: var(--text); min-height: 100vh; }
 
-        /* Login Screen */
         .login-wrapper {
             min-height: 100vh;
             display: flex;
@@ -48,7 +47,6 @@
             box-shadow: 0 10px 20px rgba(180, 134, 42, 0.3);
         }
 
-        /* Navbar */
         .navbar {
             background: rgba(255, 252, 245, 0.88);
             backdrop-filter: blur(16px);
@@ -76,7 +74,6 @@
 
         .main-container { max-width: 1220px; margin: 0 auto; padding: 28px 20px; }
 
-        /* Stats Row */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -101,7 +98,6 @@
         .stat-info h4 { font-size: 0.8rem; color: var(--muted); font-weight: 600; }
         .stat-info p { font-size: 1.5rem; font-weight: 800; margin-top: 2px; color: var(--text); }
 
-        /* Dashboard Grid */
         .dashboard-grid {
             display: grid;
             grid-template-columns: 410px 1fr;
@@ -130,7 +126,6 @@
         }
         .panel-header h2 { font-size: 1.08rem; font-weight: 800; color: var(--text); }
 
-        /* Form Inputs */
         .form-group { margin-bottom: 13px; }
         .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         label { display: block; font-size: 0.8rem; color: var(--muted); margin-bottom: 5px; font-weight: 700; }
@@ -179,7 +174,6 @@
             margin-top: 8px;
         }
 
-        /* Client List & Search */
         .search-box { position: relative; margin-bottom: 16px; }
         .search-box i { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--muted); }
         .search-box input { padding-left: 38px; }
@@ -204,9 +198,7 @@
             font-size: 0.7rem; padding: 3px 8px; border-radius: 6px;
             background: rgba(212, 175, 55, 0.18); color: #8a6214; font-weight: 700;
         }
-        .badge-stock {
-            background: #fef3c7; color: #b45309;
-        }
+        .badge-stock { background: #fef3c7; color: #b45309; }
         .link-bar {
             background: var(--surface-2);
             border: 1px solid var(--border);
@@ -245,7 +237,6 @@
         .act-qr { background: #fffbeb; color: #b45309; border-color: #fde68a; }
         .act-del { background: #fef2f2; color: #b91c1c; border-color: #fecaca; flex: 0; padding: 8px 12px; }
 
-        /* QR Modal */
         .modal-overlay {
             position: fixed; inset: 0; background: rgba(44, 34, 20, 0.65);
             backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center;
@@ -288,7 +279,6 @@
         </nav>
 
         <div class="main-container">
-            <!-- Stats Overview -->
             <div class="stats-grid">
                 <div class="stat-card">
                     <div class="stat-icon"><i class="fa-solid fa-layer-group"></i></div>
@@ -305,9 +295,8 @@
             </div>
 
             <div class="dashboard-grid">
-                <!-- Left Column: Bulk Stock + Single Form -->
                 <div>
-                    <!-- Bulk Stock Standee Generator -->
+                    <!-- Bulk Stock Generator -->
                     <div class="panel">
                         <div class="panel-header">
                             <h2><i class="fa-solid fa-boxes-stacked" style="color: var(--gold);"></i> Pre-Generate Stock Standees</h2>
@@ -424,23 +413,23 @@
     </div>
 
     <script>
-        const ADMIN_PASS = "Review#@4441";
-        const SUPABASE_URL = 'https://fkwelspxbicybrlhugrq.supabase.co';
-        const SUPABASE_KEY = 'sb_publishable_FYkUWEtjcxR9VkU3r9ewFQ_-2I1X32C';
+        const ADMIN_PASS = "Review#@4441!@";
+        const SUPABASE_URL = 'https://ztfybskmgyfwjkaxqubn.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_A0tMvKE61iGVB7efMuzmmQ_bDU88mMe';
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         const baseUrl = window.location.origin;
         let clientsData = [];
         let isEditing = false;
 
-        if (sessionStorage.getItem('tap_admin_logged') === 'true') {
+        if (sessionStorage.getItem('tap_admin_logged_final') === 'true') {
             unlockApp();
         }
 
         function verifyLogin() {
             const val = document.getElementById('password-input').value;
             if (val === ADMIN_PASS) {
-                sessionStorage.setItem('tap_admin_logged', 'true');
+                sessionStorage.setItem('tap_admin_logged_final', 'true');
                 unlockApp();
             } else {
                 alert("Incorrect Password!");
@@ -455,7 +444,7 @@
         }
 
         function logout() {
-            sessionStorage.removeItem('tap_admin_logged');
+            sessionStorage.removeItem('tap_admin_logged_final');
             location.reload();
         }
 
@@ -495,7 +484,7 @@
         function renderClients(list) {
             const container = document.getElementById('clients-container');
             if (!list.length) {
-                container.innerHTML = `<p style="color:var(--muted); text-align:center; padding: 20px;">No standees found.</p>`;
+                container.innerHTML = `<p style="color:var(--muted); text-align:center; padding: 20px;">No standees found. Add a client or generate stock on the left.</p>`;
                 return;
             }
 
@@ -545,7 +534,6 @@
             renderClients(filtered);
         }
 
-        // Bulk Stock Generator (1-10, 1-100, etc.)
         async function generateBulkStock() {
             const prefix = document.getElementById('bulk-prefix').value.trim().toLowerCase().replace(/[^a-z0-9-]/g, '') || 'standee';
             const start = parseInt(document.getElementById('bulk-start').value);
