@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TapSocial Pro | Gold Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        :root {
+            --bg: linear-gradient(135deg, #fdfbf7 0%, #f4e8cf 100%);
+            --surface: rgba(255, 253, 248, 0.92);
+            --surface-2: #faf3e3;
+            --border: rgba(180, 134, 42, 0.25);
+            --gold: #b4862a;
+            --gold-grad: linear-gradient(135deg, #d4af37 0%, #9e7114 100%);
+            --text: #2c2214;
+            --muted: #78664e;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { background: var(--bg); color: var(--text); min-height: 100vh; }
+
+        /* Login Screen */
+        .login-wrapper {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .login-card {
+            width: 100%;
+            max-width: 400px;
+            background: var(--surface);
+            border: 1.5px solid var(--border);
+            border-radius: 28px;
+            padding: 36px 28px;
+            text-align: center;
+            box-shadow: 0 25px 50px -12px rgba(138, 102, 28, 0.2);
+        }
+        .login-icon {
+            width: 64px; height: 64px; margin: 0 auto 16px;
+            background: var(--gold-grad);
+            border-radius: 20px; display: flex; align-items: center; justify-content: center;
+            font-size: 28px; color: #fff;
+            box-shadow: 0 10px 20px rgba(180, 134, 42, 0.3);
+        }
+
+        /* Navbar */
+        .navbar {
+            background: rgba(255, 252, 245, 0.88);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border);
+            padding: 16px 24px;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .brand { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 1.25rem; color: var(--text); }
+        .brand i { color: var(--gold); }
+        .logout-btn {
+            background: #fee2e2;
+            color: #b91c1c;
+            border: 1px solid #fecaca;
+            padding: 8px 14px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 0.85rem;
+        }
+
+        .main-container { max-width: 1220px; margin: 0 auto; padding: 28px 20px; }
+
+        /* Stats Row */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .stat-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            box-shadow: 0 8px 20px rgba(138, 102, 28, 0.08);
+        }
+        .stat-icon {
+            width: 48px; height: 48px; border-radius: 14px;
+            background: rgba(212, 175, 55, 0.18); color: var(--gold);
+            display: flex; align-items: center; justify-content: center; font-size: 20px;
+        }
+        .stat-info h4 { font-size: 0.8rem; color: var(--muted); font-weight: 600; }
+        .stat-info p { font-size: 1.5rem; font-weight: 800; margin-top: 2px; color: var(--text); }
+
+        /* Dashboard Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 410px 1fr;
+            gap: 24px;
+            align-items: start;
+        }
+        @media (max-width: 920px) {
+            .dashboard-grid { grid-template-columns: 1fr; }
+        }
+
+        .panel {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 12px 28px rgba(138, 102, 28, 0.08);
+        }
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 18px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+        }
+        .panel-header h2 { font-size: 1.08rem; font-weight: 800; color: var(--text); }
+
+        /* Form Inputs */
+        .form-group { margin-bottom: 13px; }
+        .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        label { display: block; font-size: 0.8rem; color: var(--muted); margin-bottom: 5px; font-weight: 700; }
+        input, select {
+            width: 100%;
+            padding: 11px 14px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: #ffffff;
+            color: var(--text);
+            font-size: 0.9rem;
+            outline: none;
+            transition: border 0.2s;
+        }
+        input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.15); }
+        .slug-preview { font-size: 0.75rem; color: var(--gold); font-weight: 600; margin-top: 4px; word-break: break-all; }
+
+        .btn-primary {
+            width: 100%;
+            padding: 13px;
+            border: none;
+            border-radius: 12px;
+            background: var(--gold-grad);
+            color: #fff;
+            font-weight: 700;
+            font-size: 0.95rem;
+            cursor: pointer;
+            margin-top: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 8px 18px rgba(180, 134, 42, 0.28);
+        }
+        .btn-primary:hover { opacity: 0.94; }
+        .btn-secondary {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            background: var(--surface-2);
+            color: var(--text);
+            font-weight: 700;
+            font-size: 0.85rem;
+            cursor: pointer;
+            margin-top: 8px;
+        }
+
+        /* Client List & Search */
+        .search-box { position: relative; margin-bottom: 16px; }
+        .search-box i { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--muted); }
+        .search-box input { padding-left: 38px; }
+
+        .client-card {
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 16px;
+            margin-bottom: 12px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .client-card:hover { box-shadow: 0 10px 22px rgba(138, 102, 28, 0.12); border-color: #d4af37; }
+        .client-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+        .client-meta { display: flex; align-items: center; gap: 12px; }
+        .client-avatar {
+            width: 44px; height: 44px; border-radius: 12px;
+            background: var(--surface-2); object-fit: cover; border: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: center; font-weight: 800; color: var(--gold);
+        }
+        .badge {
+            font-size: 0.7rem; padding: 3px 8px; border-radius: 6px;
+            background: rgba(212, 175, 55, 0.18); color: #8a6214; font-weight: 700;
+        }
+        .badge-stock {
+            background: #fef3c7; color: #b45309;
+        }
+        .link-bar {
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            padding: 8px 12px;
+            border-radius: 10px;
+            margin: 12px 0;
+            font-size: 0.78rem;
+            color: #7c5812;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+        }
+        .link-bar span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+        .action-row { display: flex; gap: 8px; flex-wrap: wrap; }
+        .act-btn {
+            flex: 1;
+            min-width: 75px;
+            padding: 8px 10px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: var(--surface-2);
+            color: var(--text);
+            font-size: 0.78rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+        .act-btn:hover { background: #f1e3c4; }
+        .act-copy { background: #ecfdf5; color: #047857; border-color: #a7f3d0; }
+        .act-qr { background: #fffbeb; color: #b45309; border-color: #fde68a; }
+        .act-del { background: #fef2f2; color: #b91c1c; border-color: #fecaca; flex: 0; padding: 8px 12px; }
+
+        /* QR Modal */
+        .modal-overlay {
+            position: fixed; inset: 0; background: rgba(44, 34, 20, 0.65);
+            backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center;
+            z-index: 100; padding: 20px;
+        }
+        .modal-box {
+            background: #fffdf9; border: 2px solid var(--gold);
+            border-radius: 26px; padding: 28px; max-width: 350px; width: 100%; text-align: center;
+        }
+        #qr-canvas {
+            background: #fff; padding: 16px; border-radius: 16px; border: 1px solid var(--border);
+            display: inline-block; margin: 16px 0;
+        }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <!-- Login Section -->
+    <div id="login-screen" class="login-wrapper">
+        <div class="login-card">
+            <div class="login-icon"><i class="fa-solid fa-crown"></i></div>
+            <h2 style="margin-bottom: 6px;">TapSocial Gold Admin</h2>
+            <p style="color: var(--muted); font-size: 0.85rem; margin-bottom: 22px;">Manage Client & Stock Standees</p>
+            <div class="form-group" style="text-align: left;">
+                <label>Admin Password</label>
+                <input type="password" id="password-input" placeholder="••••••••••••" onkeypress="if(event.key==='Enter') verifyLogin()">
+            </div>
+            <button class="btn-primary" onclick="verifyLogin()">
+                <i class="fa-solid fa-lock-open"></i> Access Dashboard
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Dashboard -->
+    <div id="app-screen" class="hidden">
+        <nav class="navbar">
+            <div class="brand"><i class="fa-solid fa-crown"></i> TapSocial <span style="font-size: 0.7rem; background: #f3e5c2; padding: 3px 8px; border-radius: 6px; color: #8a6214;">GOLD EDITION</span></div>
+            <button class="logout-btn" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
+        </nav>
+
+        <div class="main-container">
+            <!-- Stats Overview -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fa-solid fa-layer-group"></i></div>
+                    <div class="stat-info"><h4>Total Standees</h4><p id="stat-total">0</p></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fa-solid fa-box-open"></i></div>
+                    <div class="stat-info"><h4>Unassigned Stock</h4><p id="stat-stock">0</p></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fa-solid fa-hand-pointer"></i></div>
+                    <div class="stat-info"><h4>Total Taps / Scans</h4><p id="stat-taps">0</p></div>
+                </div>
+            </div>
+
+            <div class="dashboard-grid">
+                <!-- Left Column: Bulk Stock + Single Form -->
+                <div>
+                    <!-- Bulk Stock Standee Generator -->
+                    <div class="panel">
+                        <div class="panel-header">
+                            <h2><i class="fa-solid fa-boxes-stacked" style="color: var(--gold);"></i> Pre-Generate Stock Standees</h2>
+                        </div>
+                        <p style="font-size: 0.78rem; color: var(--muted); margin-bottom: 12px;">
+                            पहले से 1-10 या 1-100 standee links और QR तैयार करें। बाद में client आने पर सिर्फ Edit करके detail भरें।
+                        </p>
+                        <div class="form-group">
+                            <label>Prefix (जैसे: standee या card)</label>
+                            <input type="text" id="bulk-prefix" value="standee">
+                        </div>
+                        <div class="row-2">
+                            <div class="form-group">
+                                <label>Start Number</label>
+                                <input type="number" id="bulk-start" value="1" min="1">
+                            </div>
+                            <div class="form-group">
+                                <label>End Number (e.g. 10, 100)</label>
+                                <input type="number" id="bulk-end" value="10" min="1" max="500">
+                            </div>
+                        </div>
+                        <button type="button" class="btn-primary" id="bulk-btn" onclick="generateBulkStock()">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> Generate Stock Links
+                        </button>
+                        <button type="button" class="btn-secondary" onclick="copyAllStockLinks()">
+                            <i class="fa-solid fa-copy"></i> Copy All Stock URLs (For NFC/QR)
+                        </button>
+                    </div>
+
+                    <!-- Add / Edit Client Form -->
+                    <div class="panel">
+                        <div class="panel-header">
+                            <h2 id="form-title"><i class="fa-solid fa-user-plus" style="color: var(--gold);"></i> Add / Assign Client</h2>
+                        </div>
+                        <form id="client-form">
+                            <div class="form-group">
+                                <label>Client / Business Name *</label>
+                                <input type="text" id="business_name" placeholder="e.g. Royal Cafe Surat" required oninput="autoSlug()">
+                            </div>
+
+                            <div class="form-group">
+                                <label>Unique URL Slug *</label>
+                                <input type="text" id="slug" placeholder="e.g. standee-1 या royal-cafe" required oninput="updatePreview()">
+                                <div class="slug-preview" id="url-preview">Link: https://.../ ?id=royal-cafe</div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Tagline</label>
+                                <input type="text" id="tagline" value="Follow, Review & Chat with us in one tap">
+                            </div>
+
+                            <div class="form-group">
+                                <label>Logo / Profile Image URL (Optional)</label>
+                                <input type="url" id="logo_url" placeholder="https://example.com/logo.png">
+                            </div>
+
+                            <div class="form-group">
+                                <label><i class="fa-brands fa-instagram" style="color:#e1306c;"></i> Instagram Profile URL</label>
+                                <input type="url" id="instagram_url" placeholder="https://www.instagram.com/username/">
+                            </div>
+
+                            <div class="form-group">
+                                <label><i class="fa-brands fa-google" style="color:#4285F4;"></i> Google Review Direct Link</label>
+                                <input type="url" id="google_review_url" placeholder="https://g.page/r/xxxx/review">
+                            </div>
+
+                            <div class="form-group">
+                                <label><i class="fa-brands fa-whatsapp" style="color:#25D366;"></i> WhatsApp Number (with 91)</label>
+                                <input type="text" id="whatsapp_number" placeholder="919876543210">
+                            </div>
+
+                            <div class="form-group">
+                                <label>WhatsApp Pre-filled Message</label>
+                                <input type="text" id="whatsapp_message" value="Hello! I scanned your standee.">
+                            </div>
+
+                            <button type="submit" class="btn-primary" id="save-btn">
+                                <i class="fa-solid fa-floppy-disk"></i> Save Client Standee
+                            </button>
+                            <button type="button" class="btn-secondary hidden" id="cancel-edit-btn" onclick="resetForm()">
+                                Cancel Edit
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Right Column: Client & Stock List -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <h2><i class="fa-solid fa-list-check" style="color: var(--gold);"></i> All Standees (Clients & Stock)</h2>
+                    </div>
+
+                    <div class="search-box">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text" id="search-input" placeholder="Search client name or standee number (e.g. standee-5)..." onkeyup="filterClients()">
+                    </div>
+
+                    <div id="clients-container">Loading standees...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- QR Code Modal -->
+    <div id="qr-modal" class="modal-overlay hidden" onclick="if(event.target===this) closeQR()">
+        <div class="modal-box">
+            <h3 id="qr-client-name">Client QR</h3>
+            <p style="font-size: 0.78rem; color: var(--muted); margin-top: 4px;">Download PNG for Standee Printing</p>
+            <div id="qr-canvas"></div>
+            <p id="qr-url-text" style="font-size: 0.75rem; color: var(--gold); font-weight: 700; word-break: break-all; margin-bottom: 14px;"></p>
+            <button class="btn-primary" onclick="downloadQR()"><i class="fa-solid fa-download"></i> Download PNG QR</button>
+            <button class="btn-secondary" onclick="closeQR()">Close</button>
+        </div>
+    </div>
+
+    <script>
+        const ADMIN_PASS = "Review#@4441";
+        const SUPABASE_URL = 'https://fkwelspxbicybrlhugrq.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_FYkUWEtjcxR9VkU3r9ewFQ_-2I1X32C';
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        const baseUrl = window.location.origin;
+        let clientsData = [];
+        let isEditing = false;
+
+        if (sessionStorage.getItem('tap_admin_logged') === 'true') {
+            unlockApp();
+        }
+
+        function verifyLogin() {
+            const val = document.getElementById('password-input').value;
+            if (val === ADMIN_PASS) {
+                sessionStorage.setItem('tap_admin_logged', 'true');
+                unlockApp();
+            } else {
+                alert("Incorrect Password!");
+            }
+        }
+
+        function unlockApp() {
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('app-screen').classList.remove('hidden');
+            updatePreview();
+            loadClients();
+        }
+
+        function logout() {
+            sessionStorage.removeItem('tap_admin_logged');
+            location.reload();
+        }
+
+        function autoSlug() {
+            if (isEditing) return;
+            const name = document.getElementById('business_name').value;
+            const slug = name.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+            document.getElementById('slug').value = slug;
+            updatePreview();
+        }
+
+        function updatePreview() {
+            const slug = document.getElementById('slug').value.trim() || 'your-slug';
+            document.getElementById('url-preview').textContent = `NFC/QR URL: ${baseUrl}/?id=${slug}`;
+        }
+
+        async function loadClients() {
+            const { data, error } = await supabaseClient
+                .from('social_standees')
+                .select('*')
+                .order('created_at', { ascending: false });
+
+            if (error) {
+                document.getElementById('clients-container').innerHTML = `<p style="color:#b91c1c;">Error: ${error.message}</p>`;
+                return;
+            }
+
+            clientsData = data || [];
+            document.getElementById('stat-total').textContent = clientsData.length;
+            const stockCount = clientsData.filter(c => !c.instagram_url && !c.google_review_url && !c.whatsapp_number).length;
+            document.getElementById('stat-stock').textContent = stockCount;
+            document.getElementById('stat-taps').textContent = clientsData.reduce((acc, c) => acc + (c.clicks_count || 0), 0);
+
+            renderClients(clientsData);
+        }
+
+        function renderClients(list) {
+            const container = document.getElementById('clients-container');
+            if (!list.length) {
+                container.innerHTML = `<p style="color:var(--muted); text-align:center; padding: 20px;">No standees found.</p>`;
+                return;
+            }
+
+            container.innerHTML = list.map(c => {
+                const nfcUrl = `${baseUrl}/?id=${c.slug}`;
+                const isStock = !c.instagram_url && !c.google_review_url && !c.whatsapp_number;
+                const avatarHtml = c.logo_url
+                    ? `<img src="${c.logo_url}" class="client-avatar" alt="logo">`
+                    : `<div class="client-avatar">${c.business_name.charAt(0).toUpperCase()}</div>`;
+
+                return `
+                    <div class="client-card">
+                        <div class="client-top">
+                            <div class="client-meta">
+                                ${avatarHtml}
+                                <div>
+                                    <h3 style="font-size: 1rem;">${c.business_name}</h3>
+                                    <span class="badge ${isStock ? 'badge-stock' : ''}">${isStock ? 'STOCK READY' : 'ACTIVE'} • /${c.slug}</span>
+                                    <span style="font-size: 0.72rem; color: var(--muted); margin-left: 6px;">
+                                        <i class="fa-solid fa-eye"></i> ${c.clicks_count || 0} taps
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="link-bar">
+                            <span>${nfcUrl}</span>
+                            <a href="${nfcUrl}" target="_blank" style="color: var(--gold); text-decoration: none; font-weight: 800;">Open ↗</a>
+                        </div>
+
+                        <div class="action-row">
+                            <button class="act-btn act-copy" onclick="copyUrl('${nfcUrl}')"><i class="fa-regular fa-copy"></i> Copy Link</button>
+                            <button class="act-btn act-qr" onclick="openQR('${c.slug}', '${nfcUrl}')"><i class="fa-solid fa-qrcode"></i> QR PNG</button>
+                            <button class="act-btn" onclick="startEdit('${c.id}')"><i class="fa-solid fa-pen"></i> Edit Details</button>
+                            <button class="act-btn act-del" onclick="deleteClient('${c.id}', '${c.business_name.replace(/'/g, "\\'")}')"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function filterClients() {
+            const q = document.getElementById('search-input').value.toLowerCase();
+            const filtered = clientsData.filter(c =>
+                c.business_name.toLowerCase().includes(q) || c.slug.toLowerCase().includes(q)
+            );
+            renderClients(filtered);
+        }
+
+        // Bulk Stock Generator (1-10, 1-100, etc.)
+        async function generateBulkStock() {
+            const prefix = document.getElementById('bulk-prefix').value.trim().toLowerCase().replace(/[^a-z0-9-]/g, '') || 'standee';
+            const start = parseInt(document.getElementById('bulk-start').value);
+            const end = parseInt(document.getElementById('bulk-end').value);
+
+            if (isNaN(start) || isNaN(end) || start > end || (end - start) > 200) {
+                alert("Please enter a valid range (max 200 at once).");
+                return;
+            }
+
+            const btn = document.getElementById('bulk-btn');
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Generating...`;
+
+            const rows = [];
+            for (let i = start; i <= end; i++) {
+                rows.push({
+                    slug: `${prefix}-${i}`,
+                    business_name: `Standee #${i} (Unassigned)`,
+                    tagline: 'Follow, Review & Chat with us in one tap'
+                });
+            }
+
+            const { error } = await supabaseClient
+                .from('social_standees')
+                .upsert(rows, { onConflict: 'slug', ignoreDuplicates: true });
+
+            btn.innerHTML = `<i class="fa-solid fa-wand-magic-sparkles"></i> Generate Stock Links`;
+
+            if (error) {
+                alert("Error generating stock: " + error.message);
+            } else {
+                alert(`${rows.length} Stock Standees (${prefix}-${start} to ${prefix}-${end}) ready!`);
+                loadClients();
+            }
+        }
+
+        function copyAllStockLinks() {
+            const prefix = document.getElementById('bulk-prefix').value.trim().toLowerCase() || 'standee';
+            const start = parseInt(document.getElementById('bulk-start').value) || 1;
+            const end = parseInt(document.getElementById('bulk-end').value) || 10;
+            const links = [];
+            for (let i = start; i <= end; i++) {
+                links.push(`${baseUrl}/?id=${prefix}-${i}`);
+            }
+            navigator.clipboard.writeText(links.join('\n'));
+            alert(`Copied ${links.length} URLs to clipboard!`);
+        }
+
+        document.getElementById('client-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('save-btn');
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Saving...`;
+
+            const payload = {
+                slug: document.getElementById('slug').value.trim().toLowerCase().replace(/\s+/g, '-'),
+                business_name: document.getElementById('business_name').value.trim(),
+                tagline: document.getElementById('tagline').value.trim(),
+                logo_url: document.getElementById('logo_url').value.trim(),
+                instagram_url: document.getElementById('instagram_url').value.trim(),
+                google_review_url: document.getElementById('google_review_url').value.trim(),
+                whatsapp_number: document.getElementById('whatsapp_number').value.trim(),
+                whatsapp_message: document.getElementById('whatsapp_message').value.trim()
+            };
+
+            const { error } = await supabaseClient
+                .from('social_standees')
+                .upsert(payload, { onConflict: 'slug' });
+
+            btn.innerHTML = `<i class="fa-solid fa-floppy-disk"></i> Save Client Standee`;
+
+            if (error) {
+                alert("Error: " + error.message);
+            } else {
+                resetForm();
+                loadClients();
+            }
+        });
+
+        function startEdit(id) {
+            const c = clientsData.find(x => x.id === id);
+            if (!c) return;
+            isEditing = true;
+            document.getElementById('form-title').innerHTML = `<i class="fa-solid fa-pen-to-square" style="color:var(--gold);"></i> Assign / Edit Standee`;
+            document.getElementById('business_name').value = c.business_name.includes('(Unassigned)') ? '' : c.business_name;
+            document.getElementById('slug').value = c.slug;
+            document.getElementById('slug').readOnly = true;
+            document.getElementById('tagline').value = c.tagline || 'Follow, Review & Chat with us in one tap';
+            document.getElementById('logo_url').value = c.logo_url || '';
+            document.getElementById('instagram_url').value = c.instagram_url || '';
+            document.getElementById('google_review_url').value = c.google_review_url || '';
+            document.getElementById('whatsapp_number').value = c.whatsapp_number || '';
+            document.getElementById('whatsapp_message').value = c.whatsapp_message || 'Hello! I scanned your standee.';
+            document.getElementById('cancel-edit-btn').classList.remove('hidden');
+            updatePreview();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function resetForm() {
+            isEditing = false;
+            document.getElementById('client-form').reset();
+            document.getElementById('slug').readOnly = false;
+            document.getElementById('form-title').innerHTML = `<i class="fa-solid fa-user-plus" style="color: var(--gold);"></i> Add / Assign Client`;
+            document.getElementById('cancel-edit-btn').classList.add('hidden');
+            updatePreview();
+        }
+
+        async function deleteClient(id, name) {
+            if (!confirm(`Delete "${name}" permanently?`)) return;
+            await supabaseClient.from('social_standees').delete().eq('id', id);
+            loadClients();
+        }
+
+        function copyUrl(url) {
+            navigator.clipboard.writeText(url);
+            alert("Copied NFC / QR Link:\n" + url);
+        }
+
+        function openQR(name, url) {
+            document.getElementById('qr-client-name').textContent = name;
+            document.getElementById('qr-url-text').textContent = url;
+            const qrBox = document.getElementById('qr-canvas');
+            qrBox.innerHTML = "";
+            new QRCode(qrBox, { text: url, width: 210, height: 210, colorDark: "#2c2214", colorLight: "#ffffff" });
+            document.getElementById('qr-modal').classList.remove('hidden');
+        }
+
+        function closeQR() {
+            document.getElementById('qr-modal').classList.add('hidden');
+        }
+
+        function downloadQR() {
+            const img = document.querySelector('#qr-canvas img');
+            if (!img) return;
+            const link = document.createElement('a');
+            link.href = img.src;
+            link.download = `${document.getElementById('qr-client-name').textContent}-QR.png`;
+            link.click();
+        }
+    </script>
+</body>
+</html>
